@@ -1,23 +1,88 @@
 # UBCMS URL Switcher
 
-Small, local-only Chrome extension for switching UBCMS environments and AEM views.
+Small, local-only Chrome and Firefox extension for switching UBCMS environments and AEM views.
 No build, dependencies, backend, automatic redirects, tracking, or page scripts.
 
 ## Install in Chrome
 
-1. Open `chrome://extensions`.
-2. Enable **Developer mode**.
-3. Click **Load unpacked** and select this directory:
-   `/Users/samaraie/Developer/ubcms-url-switcher`.
-4. Open Chrome's Extensions menu and pin **UBCMS URL Switcher**.
-5. Visit a UBCMS page and click the extension.
+Requirements: Google Chrome and access to the UBCMS environments you want to use.
+Node.js and npm are not needed to install or use the extension.
 
-Keep the directory in place while the extension is installed. After changing files,
-click the extension's **Reload** button on `chrome://extensions` and reopen its popup.
+1. Clone this repository to a folder on your computer, or download and extract
+   the repository ZIP.
+2. Open `chrome://extensions` in Chrome.
+3. Enable **Developer mode**.
+4. Click **Load unpacked** and browse to the path of the unzipped repository
+   folder on your computer, for example `Downloads/ubcms-url-switcher-main/`.
+   Select the folder containing [manifest.json](./manifest.json), not the ZIP
+   file or the parent Downloads folder. If you cloned the repository instead,
+   select your local clone's root folder.
+5. Open Chrome's Extensions menu and pin **UBCMS URL Switcher**.
+6. Visit a UBCMS page and click the extension.
 
-The toolbar and extension-list icons use the existing UBCMS favicon from
-`ubcms-view/src/main/content/jcr_root/etc/designs/ubcms/images/favicon.ico`,
-converted to bundled PNGs. The source is 32x32; larger icons are scaled copies.
+Keep that folder in place while the extension is installed. All required files,
+including the UB favicon icons, are bundled; no separate UBCMS checkout is needed.
+
+### Update or remove
+
+- **Git clone:** pull the latest changes in your local clone, then click the
+  extension's **Reload** button on `chrome://extensions` and reopen its popup.
+- **ZIP download:** download the updated archive, extract it, and replace the
+  files in the folder Chrome already uses. Reload the extension afterward.
+- **Remove:** click **Remove** on the extension's card at `chrome://extensions`.
+
+## Install in Firefox
+
+Requires Firefox 140 or newer.
+
+### Permanent installation (recommended)
+
+1. Download the Mozilla-signed
+   [UBCMS URL Switcher 1.0.0 package](./releases/ubcms-url-switcher-1.0.0.xpi).
+   When viewing the file on GitHub, click **Download raw file**. If you downloaded
+   and unzipped the repository, the package is already in its `releases` folder.
+2. In Firefox, open `about:addons`.
+3. Click the gear icon and choose **Install Add-on From File...**.
+4. Select `ubcms-url-switcher-1.0.0.xpi` and approve installation.
+5. Pin **UBCMS URL Switcher** from Firefox's Extensions menu.
+
+This installation stays installed after Firefox restarts. No Developer mode,
+source checkout, or temporary add-on loading is required.
+
+To update, install a newer Mozilla-signed `.xpi` for this add-on when available.
+Pulling source changes does not update the installed signed extension.
+Remove it from `about:addons` using its menu's **Remove** option.
+
+### Temporary installation (development only)
+
+Use the same repository files as Chrome; no build or separate manifest is needed.
+
+1. Clone the repository, or download and unzip it into a folder on your computer.
+2. Open `about:debugging#/runtime/this-firefox`.
+3. Click **Load Temporary Add-on**.
+4. Browse to the unzipped repository folder (for example,
+   `Downloads/ubcms-url-switcher-main/`) and select [manifest.json](./manifest.json).
+5. Open Firefox's Extensions menu and pin **UBCMS URL Switcher** to the toolbar.
+
+Temporary add-ons are removed when Firefox restarts. Repeat the steps to reload
+the extension after restarting. To update files during the same session, click
+**Reload** on its card in `about:debugging`. Use **Remove** there to uninstall it.
+
+Do not disable Firefox signature checks. For normal use, install the signed
+package above instead of loading the source as a temporary add-on.
+
+### Firefox release maintenance
+
+The signed package in [releases](./releases/) is preserved exactly as downloaded
+from Mozilla. Do not edit or repackage it: doing so invalidates its signature.
+For a new release, increment the version in [manifest.json](./manifest.json)
+and [package.json](./package.json), submit the updated extension to Mozilla,
+and add the newly signed package here. Keep the existing Firefox add-on ID.
+
+Maintainers can manage the approved 1.0.0 submission on its
+[Mozilla developer version page](https://addons.mozilla.org/en-US/developers/addon/5f8574efb99c48a1a236/versions/6723423)
+(requires the maintainer's Mozilla account). This is not a public installation
+page; users should download the bundled signed package instead.
 
 ## Use
 
@@ -47,7 +112,7 @@ require scrolling; content is never clipped or hidden to suppress scrollbars.
 
 Expand **Advanced targets** only when you need direct instances, publishers,
 dispatchers, Training, or Syracuse. Choose a server grouped by environment.
-The basic four shortcuts, including the original Dev URL, remain unchanged.
+The basic Author, QA, QA2, and Dev shortcuts remain available outside Advanced.
 
 - A selected advanced target overrides and disables the basic environment control
   while the section is open. The preview always shows the actual destination.
@@ -75,7 +140,7 @@ The original author tab stays available for comparison.
 
 ### Included server origins
 
-These come from the supplied UBCMS host inventory. Ports and protocols are
+Targets are based on the UBCMS host inventory. Ports and protocols are
 intentional; HTTP targets are explicitly labeled as unencrypted in the popup.
 
 | Group | Role | Origins |
@@ -101,11 +166,9 @@ intentional; HTTP targets are explicitly labeled as unencrypted in the popup.
 | Syracuse | Publisher | `https://cmspub-syr.acsu.buffalo.edu:9443` |
 | Syracuse | Dispatcher | `https://cmsdisp-syr.acsu.buffalo.edu` |
 
-The QA2 dispatcher inventory has HTTP link text but an HTTPS hyperlink; the
-extension uses that HTTPS hyperlink. Obsolete numbered hosts are not included.
-The load-balanced publisher URL is included as supplied; its old note about six
-publishers is not treated as current topology. No endpoint availability has been
-verified. Internal hosts may require UB VPN or special VPN access. Load-balanced
+The QA2 dispatcher target uses HTTPS. Only the production publisher instances
+listed above are included; do not infer a server count from a load-balanced URL.
+Internal hosts may require UB VPN or special VPN access. Load-balanced
 URLs can reach different servers; select a specific instance for a fixed-server
 comparison. No VPN setup, server-console login, or authentication is automated.
 
@@ -165,15 +228,17 @@ authenticate you, or bypass VPN/network/access requirements.
 ## Permissions and privacy
 
 `activeTab` grants temporary access to the tab when you invoke the extension.
+Firefox's manifest declares that the extension collects no data.
 No persistent host permissions, browsing-history permission, content scripts,
 or background worker. The extension makes no network requests; opening a
-destination navigates Chrome normally. Clipboard access happens only when
-you click **Copy URL**. If Chrome denies copying, select the preview and copy
+destination navigates your browser normally. Clipboard access happens only when
+you click **Copy URL**. If the browser denies copying, select the preview and copy
 it manually; the popup shows the error.
 
 ## Development checks
 
-Node.js 20+ is sufficient; do not run `npm install` (there are no dependencies).
+For contributors, run these commands from the repository root using Node.js 20+.
+No dependency installation is needed.
 
 ```sh
 npm test
@@ -181,11 +246,14 @@ npm run check
 ```
 
 Unit tests cover URL transformations and popup actions with explicit browser API
-test doubles. These do not replace testing an installed Chrome extension.
+test doubles, including Firefox's `browser` API and Chrome's `chrome` API.
+These do not replace testing an installed extension in each browser.
 
 ### Installed-extension checks
 
-1. Load the folder unpacked and confirm Chrome reports no extension errors.
+1. Load the folder unpacked in Chrome, or install the signed package in Firefox,
+   and confirm the browser reports no extension errors. For testing source
+   changes in Firefox, use temporary installation instead.
 2. On QA Editor `/editor.html/content/demo-next-gen.html`, select QA2.
    Verify preview, open it without checking **Open in a new tab**, and confirm
    the original tab navigates to QA2.
@@ -196,7 +264,8 @@ test doubles. These do not replace testing an installed Chrome extension.
    `https://ubcms-qa2.buffalo.edu/assets.html/content/dam/demo`. From a DAM
    folder, switch environments and confirm the folder stays unchanged.
 7. Copy a destination, paste it into the address bar, and compare with the preview.
-8. Open the popup on `chrome://extensions`; verify that pasting a supported path
+8. Open the popup on `chrome://extensions` or Firefox's `about:debugging`;
+   verify that pasting a supported path
    still works. Paste an unsupported URL and verify an error with disabled actions.
 9. Expand Advanced and select QA2 Publisher. Confirm `:8443/content/...html`
    without an editor prefix and a disabled Page selector. Copy/open it, then close

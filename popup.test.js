@@ -8,6 +8,8 @@ function fixture() {
       id,
       {
         value: "", textContent: "", checked: false, open: false, disabled: ["open", "copy"].includes(id),
+        style: {},
+        scrollHeight: 33,
         children: [],
         listeners: {},
         append(child) { this.children.push(child); },
@@ -234,4 +236,56 @@ test("pasting a new author page keeps an explicitly selected publisher and rende
   );
   assert.equal(f.elements.view.value, "page");
   assert.equal(f.elements.view.disabled, true);
+});
+
+test("prefers Firefox browser tabs over chrome and supports default navigation", async () => {
+  const f = fixture();
+  const browser = globalThis.browser;
+  const chrome = globalThis.chrome;
+  try {
+    globalThis.browser = { tabs: f.tabs };
+    globalThis.chrome = { tabs: { query() { throw new Error("Wrong browser API"); } } };
+    await initializePopup(f.document);
+    await f.elements.open.emit("click");
+    assert.deepEqual(f.calls, [["update", 42, { url: f.elements.preview.value }]]);
+  } finally {
+    if (browser === undefined) delete globalThis.browser;
+    else globalThis.browser = browser;
+    if (chrome === undefined) delete globalThis.chrome;
+    else globalThis.chrome = chrome;
+  }
+});
+
+test("falls back to Chrome tabs when Firefox browser namespace is absent", async () => {
+  const f = fixture();
+  const browser = globalThis.browser;
+  const chrome = globalThis.chrome;
+  try {
+    delete globalThis.browser;
+    globalThis.chrome = { tabs: f.tabs };
+    await initializePopup(f.document);
+    f.elements["new-tab"].checked = true;
+    await f.elements.open.emit("click");
+    assert.deepEqual(f.calls, [["create", { url: f.elements.preview.value }]]);
+  } finally {
+    if (browser === undefined) delete globalThis.browser;
+    else globalThis.browser = browser;
+    if (chrome === undefined) delete globalThis.chrome;
+    else globalThis.chrome = chrome;
+  }
+});
+
+test("resizes fields without CSS field-sizing support and keeps long URLs scrollable", async () => {
+  const f = fixture();
+  f.document.defaultView = { CSS: { supports: () => false } };
+  await initializePopup(f.document, f.tabs, f.clipboard);
+  assert.equal(f.elements.source.style.height, "35px");
+  f.elements.source.scrollHeight = 48;
+  f.elements.preview.scrollHeight = 200;
+  await f.elements.source.emit("input");
+  assert.equal(f.elements.source.style.height, "50px");
+  assert.equal(f.elements.preview.style.height, "60px");
+  f.elements.source.scrollHeight = 33;
+  await f.elements.source.emit("input");
+  assert.equal(f.elements.source.style.height, "35px");
 });

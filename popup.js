@@ -1,6 +1,10 @@
 import { ADVANCED_TARGETS, buildUrl, ENVIRONMENTS, getTarget, parseSource } from "./url-utils.js";
 
-export async function initializePopup(document, tabs, clipboard) {
+export async function initializePopup(
+  document,
+  tabs = (globalThis.browser ?? globalThis.chrome)?.tabs,
+  clipboard = globalThis.navigator?.clipboard
+) {
   const source = document.getElementById("source");
   const environment = document.getElementById("environment");
   const advanced = document.getElementById("advanced");
@@ -15,6 +19,14 @@ export async function initializePopup(document, tabs, clipboard) {
   const status = document.getElementById("status");
   let originalTabId;
   let authorView = view.value;
+
+  function resizeFields() {
+    if (document.defaultView?.CSS.supports("field-sizing", "content")) return;
+    for (const field of [source, preview]) {
+      field.style.height = "auto";
+      field.style.height = `${Math.min(60, Math.max(35, field.scrollHeight + 2))}px`;
+    }
+  }
 
   const groups = new Map();
   for (const target of ADVANCED_TARGETS) {
@@ -62,6 +74,8 @@ export async function initializePopup(document, tabs, clipboard) {
       copyButton.disabled = true;
       error.textContent = failure.message;
       return null;
+    } finally {
+      resizeFields();
     }
   }
 
@@ -92,7 +106,7 @@ export async function initializePopup(document, tabs, clipboard) {
     if (!url) return;
     try {
       if (!tabs) {
-        throw new Error("Tab access unavailable. Load this folder as an unpacked Chrome extension.");
+        throw new Error("Tab access unavailable. Install this extension in Chrome or Firefox.");
       }
       if (!newTab.checked) {
         if (!Number.isInteger(originalTabId)) {
@@ -124,7 +138,7 @@ export async function initializePopup(document, tabs, clipboard) {
 
   try {
     if (!tabs) {
-      throw new Error("Tab access unavailable. Load this folder as an unpacked Chrome extension.");
+      throw new Error("Tab access unavailable. Install this extension in Chrome or Firefox.");
     }
     const [tab] = await tabs.query({ active: true, currentWindow: true });
     originalTabId = tab?.id;
@@ -146,5 +160,5 @@ export async function initializePopup(document, tabs, clipboard) {
 }
 
 if (typeof document !== "undefined") {
-  void initializePopup(document, globalThis.chrome?.tabs, globalThis.navigator?.clipboard);
+  void initializePopup(document);
 }
