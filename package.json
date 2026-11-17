@@ -1,0 +1,10 @@
+{
+  "name": "ubcms-url-switcher",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test url-utils.test.js popup.test.js",
+    "check": "node --check url-utils.js && node --check popup.js"
+  }
+}

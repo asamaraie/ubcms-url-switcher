@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UBCMS URL Switcher</title>
+    <link rel="stylesheet" href="popup.css">
+    <script type="module" src="popup.js"></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="eyebrow">UBCMS TOOLS</span>
+        <h1>URL Switcher</h1>
+        <p>Same content. Different environment or view.</p>
+      </header>
+
+      <label for="source">Current URL or content path</label>
+      <textarea id="source" rows="3" spellcheck="false"
+        placeholder="Paste a URL or /content/demo-next-gen.html"></textarea>
+      <p class="hint">Live www.buffalo.edu paths map to /content/www/.</p>
+
+      <div class="selectors">
+        <div>
+          <label for="environment">Environment</label>
+          <select id="environment">
+            <option value="author">Author</option>
+            <option value="qa" selected>QA</option>
+            <option value="qa2">QA2</option>
+            <option value="dev">Dev</option>
+          </select>
+        </div>
+        <div>
+          <label for="view">View</label>
+          <select id="view">
+            <option value="page">Page</option>
+            <option value="editor" selected>Editor</option>
+            <option value="sites">Sites</option>
+            <option value="assets">Assets</option>
+          </select>
+        </div>
+      </div>
+
+      <details id="advanced">
+        <summary>Advanced targets</summary>
+        <label for="advanced-target">Server / instance</label>
+        <select id="advanced-target" aria-describedby="target-hint">
+          <option value="">Use basic environment above</option>
+        </select>
+        <p id="target-hint" class="hint"></p>
+        <p class="hint">UB / special VPN may be required. Closing Advanced restores basic environment.</p>
+      </details>
+
+      <label for="preview">Destination</label>
+      <textarea id="preview" rows="3" readonly spellcheck="false"
+        placeholder="Destination URL appears here"></textarea>
+
+      <label class="checkbox" for="new-tab">
+        <input id="new-tab" type="checkbox">
+        Open in a new tab
+      </label>
+      <div class="actions">
+        <button id="open" type="button" disabled>Open URL</button>
+        <button id="copy" type="button" class="secondary" disabled>Copy URL</button>
+      </div>
+      <p id="error" role="alert"></p>
+      <p id="status" role="status" aria-live="polite">Reading current tab...</p>
+    </main>
+  </body>
+</html>
